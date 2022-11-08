@@ -1,0 +1,11 @@
+- Crear un servidor y un cliente y conectarlos (X)
+- Hacer un send() y recv() entre ellos(X)
+- Modificar el servidor para aceptar infinitos clientes(X)
+- Obtener el puerto de los clientes que se conectan
+- Crear una matriz y añadir las conexiones a medida que sean suficientes
+- Crear un servidor del lado del cliente
+- Enviar los puertos de los vecinos a los clientes
+- Establecer conexion peer-to-peer ("NEW_CLIENTS")
+- Implementar logica del juego
+- Implementar "TICK"
+- TP completado
