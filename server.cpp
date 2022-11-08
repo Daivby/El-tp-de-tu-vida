@@ -6,25 +6,28 @@ using namespace std;
 
 int aceptar_cliente( vector<int> &direcciones, int s)
 {
-thread threads[1024];
-threads[0] = thread(aceptar_cliente, s, &direcciones);
-threads[0].join();
-while(true)
+    
     {
-     int s1;
-     struct sockaddr_in remote;
-     int t;
-
+    
+        int s1;
+        struct sockaddr_in remote;
+        int t;
+        int puerto = PORT + 1;
+        request req;
+        strncpy(req.type, "PUERTO", 15);
+        string puertotemp_str = to_string(puerto);
+        char const* puerto2 = puertotemp_str.c_str();
+        strncpy(req.msg, puerto2, MENSAJE_MAXIMO);
         if((s1 = accept(s, (struct sockaddr *) &remote, (socklen_t *) &t))== -1)
-            {
-                perror("aceptando la conexion entrante");
-                exit(1);
-            }
-        
+        {
+            perror("aceptando la conexion entrante");
+            exit(1);
+        }
+            
         direcciones.push_back(s1);
         cout << "conexion establecida" << endl;
+        sendrequest(s1, req);
     }
-
 }
 
 
@@ -64,9 +67,7 @@ int main()
 
     int t = sizeof(remote);
     int i = 0;  
-    
-    aceptar_cliente(direcciones, s);
-    sendrequest(s1, req);
-    close(s1);
+    threads = thread(aceptar_cliente, s, direcciones);
+    threads.join();
     return 0;
 }
