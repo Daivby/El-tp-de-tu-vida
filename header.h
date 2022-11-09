@@ -22,6 +22,7 @@
 #include <mutex>
 #include <sys/wait.h>
 #include <cassert>
+#include <random>
 #define PORT 5030
 #define MENSAJE_MAXIMO  256
 

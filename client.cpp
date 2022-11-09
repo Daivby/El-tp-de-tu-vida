@@ -10,8 +10,9 @@ int main()
     struct sockaddr_in remote;
     struct in_addr addr;
     struct sockaddr_in local;
-    struct sockaddr_in remote;
     char buf[MENSAJE_MAXIMO];
+
+
     strncpy(req.type, "Clientes", 15);
     vector <int> direcciones; 
 
@@ -48,16 +49,41 @@ int main()
     remote.sin_port = htons(PORT);
     inet_pton(AF_INET, "127.0.0.1", &(remote.sin_addr));
 
-    int s = connect(socket_fd, (struct sockaddr *)&remote, sizeof(remote));
-    if (s == -1)
+    int result = connect(socket_fd, (struct sockaddr *)&remote, sizeof(remote));
+    if (result == -1)
     {
         perror ("conectandose");
         exit(1);
     }
 
-    sendrequest(s1,req);
     recvrequest(socket_fd, req);
+    int puertoCl = atoi(req.msg);
     cout << req.type << endl;
+    cout << puertoCl << endl;
+    
+    
+    if ((s = socket (PF_INET, SOCK_STREAM, 0))== -1)
+    {
+        perror("socket");
+        exit(1);
+    }
+
+    local.sin_family = AF_INET;
+    local.sin_port = htons(puertoCl);
+    local.sin_addr.s_addr = INADDR_ANY; 
+
+    if (bind(s, (struct sockaddr *)&local, sizeof(local)) < 0)
+    {
+        perror("bind");
+        exit(1);  
+    }
+
+    if (listen(s, 10) == -1) 
+    {
+        perror("listen");
+        exit(1);
+    }
+    
     close(socket_fd);
 
     return 0;

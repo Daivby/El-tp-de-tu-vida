@@ -1,18 +1,19 @@
 #include "header.h"
 #include <sys/types.h>
 #include <sys/socket.h>
-
 using namespace std;
+sem_t minimal;
 
-int aceptar_cliente( vector<int> &direcciones, int s)
+void aceptar_cliente( vector<int> &direcciones, int s, vector<int> &listpuerto)
 {
-    
-    {
+    int puerto = PORT + 1;
+    int amount;
+    while(true)
+    { 
     
         int s1;
         struct sockaddr_in remote;
         int t;
-        int puerto = PORT + 1;
         request req;
         strncpy(req.type, "PUERTO", 15);
         string puertotemp_str = to_string(puerto);
@@ -23,10 +24,18 @@ int aceptar_cliente( vector<int> &direcciones, int s)
             perror("aceptando la conexion entrante");
             exit(1);
         }
-            
+        listpuerto.push_back(puerto);    
         direcciones.push_back(s1);
         cout << "conexion establecida" << endl;
         sendrequest(s1, req);
+        puerto++;
+    
+        amount++;
+        if(amount == 9)
+        {   
+            sem_post(&minimal);
+        }
+    
     }
 }
 
@@ -35,6 +44,7 @@ int aceptar_cliente( vector<int> &direcciones, int s)
 int main()
 
 {
+    sem_init(&minimal, 0, 0);
     request req;
     strncpy(req.type, "Clientes", 15);
     int s, s1;
@@ -42,6 +52,14 @@ int main()
     struct sockaddr_in local;
     struct sockaddr_in remote;
     thread threads;
+    vector <int> listpuerto;
+    
+    
+
+    vector <vector <int>> Portmatrix;
+    vector <vector <int>> Sockmatrix; 
+    
+
 
     if ((s = socket (PF_INET, SOCK_STREAM, 0))== -1)
     {
@@ -67,7 +85,27 @@ int main()
 
     int t = sizeof(remote);
     int i = 0;  
-    threads = thread(aceptar_cliente, s, direcciones);
+    threads = thread(aceptar_cliente, ref(direcciones), s);
+    sem_wait(&minimal);
+
+    for (int a = 0; a < 3; a++)
+    {   vector <int> rowsockets;
+        vector <int> rowports;
+        
+        for (int j = 0; j < 3 ; j++)
+        {
+
+            rowports.push_back(listpuerto[j + 3 * a]);
+            rowsockets.push_back(direcciones[j + 3 * a]);
+
+        }
+        
+        Portmatrix.push_back(rowports);
+        Sockmatrix.push_back(rowsockets);
+    }
+
+    
+
     threads.join();
     return 0;
 }
