@@ -46,13 +46,13 @@ int main()
 {
     sem_init(&minimal, 0, 0);
     request req;
-    strncpy(req.type, "Clientes", 15);
     int s, s1;
     vector <int> direcciones; 
     struct sockaddr_in local;
     struct sockaddr_in remote;
     thread threads;
     vector <int> listpuerto;
+    
     
     
 
@@ -104,8 +104,67 @@ int main()
         Sockmatrix.push_back(rowsockets);
     }
 
-    
+    strncpy(req.type, "NEW_CLIENTS", 15);
+    for (int y = 0; y < 3; y++)
+    {    
+        for (int x = 0; x < 3; x++)
+        {
+            string vecinos;
+            if (x - 1 >= 0 && x - 1 < Portmatrix.size())
+            {
+               vecinos += to_string (Portmatrix[y] [x - 1]);
+               vecinos += "ñ";  
+            }
 
+            if (y - 1 >= 0 && y - 1 < Portmatrix.size())
+            {
+                vecinos += to_string (Portmatrix[y - 1] [x]);
+                vecinos += "ñ"; 
+            }
+            
+            if (x - 1 >= 0 && x - 1 < Portmatrix.size() && y - 1 >= 0 && y - 1 < Portmatrix.size())
+            {
+               vecinos += to_string (Portmatrix[y - 1] [x - 1]);
+               vecinos += "ñ";   
+            }
+
+            if (x - 1 >= 0 && x - 1 < Portmatrix.size() && y + 1 >= 0 && y + 1 < Portmatrix.size())
+            {
+               vecinos += to_string (Portmatrix[y + 1] [x - 1]);
+               vecinos += "ñ";   
+            }
+
+            if (x + 1 >= 0 && x + 1 < Portmatrix.size() && y + 1 >= 0 && y + 1 < Portmatrix.size())
+            {
+               vecinos += to_string (Portmatrix[y + 1] [x + 1]);  
+               vecinos += "ñ"; 
+            }
+
+            if (x + 1 >= 0 && x + 1 < Portmatrix.size())
+            {
+               vecinos += to_string (Portmatrix[y] [x + 1]); 
+               vecinos += "ñ";  
+            }
+
+            if (x + 1 >= 0 && x + 1 < Portmatrix.size() && y - 1 >= 0 && y - 1 < Portmatrix.size())
+            {
+               vecinos += to_string (Portmatrix[y - 1] [x + 1]); 
+               vecinos += "ñ";  
+            }
+
+            if (y + 1 >= 0 && y + 1 < Portmatrix.size())
+            {
+                vecinos += to_string (Portmatrix[y + 1] [x]);
+                vecinos += "ñ"; 
+            }        
+        
+            strncpy(req.msg, vecinos.c_str(),MENSAJE_MAXIMO);        
+            int socket = Sockmatrix[y][x];
+            sendrequest (socket, req);
+        }  
+                    
+    }
+    
     threads.join();
     return 0;
 }
