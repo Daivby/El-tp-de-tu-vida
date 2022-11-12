@@ -5,7 +5,7 @@
 - Crear una matriz y añadir las conexiones a medida que sean suficientes(X)
 - Crear un servidor del lado del cliente(X)
 - Enviar los puertos de los vecinos a los clientes(X)
-- Establecer conexion peer-to-peer ("NEW_CLIENTS")
-- Implementar logica del juego
+- Establecer conexion peer-to-peer ("NEW_CLIENTS")(X)
+- Implementar logica del juego(X)
 - Implementar "TICK"
 - TP completado

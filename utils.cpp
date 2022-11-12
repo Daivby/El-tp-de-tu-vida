@@ -27,3 +27,12 @@ int recvrequest(int socket_fd, request &req)
     return 0;
 }
 
+void broadcast(vector<int> sock_desc, request req)
+{
+    for (int i = 0; i < sock_desc.size(); i++)
+    {   
+        sendrequest(sock_desc[i], req);
+    }
+
+}
+

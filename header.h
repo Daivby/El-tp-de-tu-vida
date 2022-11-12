@@ -23,7 +23,9 @@
 #include <sys/wait.h>
 #include <cassert>
 #include <random>
-#define PORT 5030
+#include <poll.h>
+#include <math.h>
+#define PORT 4000
 #define MENSAJE_MAXIMO  256
 
 using namespace std;
@@ -45,7 +47,7 @@ struct client_request{
 // Funciones utiles sugeridas
 int recvrequest(int socket_fd, request &req);
 int read_sock(char str[], int s);
-void broadcast(vector<int>& sockets, struct request* req);
+void broadcast(vector<int> sockets, struct request req);
 void get_request(struct request* req, int s);
 int sendrequest(int socket_fd, request req);
 int set_acc_socket(int lsn_port);

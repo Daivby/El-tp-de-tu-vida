@@ -7,7 +7,7 @@ sem_t minimal;
 void aceptar_cliente( vector<int> &direcciones, int s, vector<int> &listpuerto)
 {
     int puerto = PORT + 1;
-    int amount;
+    int amount = 0;
     while(true)
     { 
     
@@ -26,7 +26,6 @@ void aceptar_cliente( vector<int> &direcciones, int s, vector<int> &listpuerto)
         }
         listpuerto.push_back(puerto);    
         direcciones.push_back(s1);
-        cout << "conexion establecida" << endl;
         sendrequest(s1, req);
         puerto++;
     
@@ -39,8 +38,6 @@ void aceptar_cliente( vector<int> &direcciones, int s, vector<int> &listpuerto)
     }
 }
 
-
-
 int main()
 
 {
@@ -52,12 +49,9 @@ int main()
     struct sockaddr_in remote;
     thread threads;
     vector <int> listpuerto;
-    
-    
-    
-
     vector <vector <int>> Portmatrix;
     vector <vector <int>> Sockmatrix; 
+    vector <int> game_sockets;
     
 
 
@@ -85,7 +79,7 @@ int main()
 
     int t = sizeof(remote);
     int i = 0;  
-    threads = thread(aceptar_cliente, ref(direcciones), s);
+    threads = thread(aceptar_cliente, ref(direcciones), s, ref(listpuerto));
     sem_wait(&minimal);
 
     for (int a = 0; a < 3; a++)
@@ -94,7 +88,7 @@ int main()
         
         for (int j = 0; j < 3 ; j++)
         {
-
+            game_sockets.push_back(direcciones[j + 3 * a]);
             rowports.push_back(listpuerto[j + 3 * a]);
             rowsockets.push_back(direcciones[j + 3 * a]);
 
@@ -113,57 +107,108 @@ int main()
             if (x - 1 >= 0 && x - 1 < Portmatrix.size())
             {
                vecinos += to_string (Portmatrix[y] [x - 1]);
-               vecinos += "ñ";  
+               vecinos += "k";  
             }
 
             if (y - 1 >= 0 && y - 1 < Portmatrix.size())
             {
                 vecinos += to_string (Portmatrix[y - 1] [x]);
-                vecinos += "ñ"; 
+                vecinos += "k"; 
             }
             
             if (x - 1 >= 0 && x - 1 < Portmatrix.size() && y - 1 >= 0 && y - 1 < Portmatrix.size())
             {
                vecinos += to_string (Portmatrix[y - 1] [x - 1]);
-               vecinos += "ñ";   
+               vecinos += "k";   
             }
 
             if (x - 1 >= 0 && x - 1 < Portmatrix.size() && y + 1 >= 0 && y + 1 < Portmatrix.size())
             {
                vecinos += to_string (Portmatrix[y + 1] [x - 1]);
-               vecinos += "ñ";   
+               vecinos += "k";   
             }
 
             if (x + 1 >= 0 && x + 1 < Portmatrix.size() && y + 1 >= 0 && y + 1 < Portmatrix.size())
             {
                vecinos += to_string (Portmatrix[y + 1] [x + 1]);  
-               vecinos += "ñ"; 
+               vecinos += "k"; 
             }
 
             if (x + 1 >= 0 && x + 1 < Portmatrix.size())
             {
                vecinos += to_string (Portmatrix[y] [x + 1]); 
-               vecinos += "ñ";  
+               vecinos += "k";  
             }
 
             if (x + 1 >= 0 && x + 1 < Portmatrix.size() && y - 1 >= 0 && y - 1 < Portmatrix.size())
             {
                vecinos += to_string (Portmatrix[y - 1] [x + 1]); 
-               vecinos += "ñ";  
+               vecinos += "k";  
             }
 
             if (y + 1 >= 0 && y + 1 < Portmatrix.size())
             {
                 vecinos += to_string (Portmatrix[y + 1] [x]);
-                vecinos += "ñ"; 
+                vecinos += "k"; 
             }        
         
             strncpy(req.msg, vecinos.c_str(),MENSAJE_MAXIMO);        
             int socket = Sockmatrix[y][x];
             sendrequest (socket, req);
-        }  
-                    
+        }                    
     }
+
+    for (int i = 0; i < 3; i++)
+    {  
+        for (int j = 0; j < 3; j++)
+        {
+            recvrequest(Sockmatrix[i][j], req);
+            string type_req(req.type);
+            if (type_req != "CLIENT_READY" )
+            {
+                perror("sending neigbours");
+                exit(1);
+            }            
+        }        
+    }
+    
+    while (true)
+    {
+        strncpy(req.type, "TICK", 15);
+        broadcast(game_sockets, req);
+        for (int i = 0; i < 3; i++)        {
+            cout << "" << endl;
+            for (int j = 0; j < 3; j++)
+            {
+                recvrequest(Sockmatrix[i][j], req);
+
+                string type_req(req.type);
+
+                if (type_req != "CLIENT_STATE" )
+                {
+                    perror("recieving state");
+                    exit(1);
+                }
+                
+                string msg_req(req.msg);
+
+                if (msg_req == "MUERTO" )
+                {
+                    cout << "| X |";
+                }
+                else 
+                {
+                    cout << "| O |";
+                }                
+            }            
+        }
+
+        cout << "" << endl;
+        cout << "-------------------------------------------------------------------------" << endl;
+        sleep(10); 
+    }
+    
+    
     
     threads.join();
     return 0;
